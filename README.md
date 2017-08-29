@@ -1,6 +1,26 @@
-# CarND-Path-Planning-Project
-Self-Driving Car Engineer Nanodegree Program
-   
+# Path Planning Project
+Udacity Self-driving car term3 path planning project.
+
+### Project Overview
+To solve the problem of running smoothly on a track provided by a simulation, the following three must be solved.
+
+- Smoothing given waypoint data
+- Minimum jerk orbit generation
+- Create a model that minimizes costs and determine behavior.
+
+### Smoothing exist waypoint data
+The track is 6.9 km, but 181 way points are given. Linear interpolation of waypoints to calculate map coordinates in Frenet coordinates and apply them to the simulator. Simply restricting the d-coordinate of the Frenet and increasing the s-coordinate sequentially results in excessive acceleration and jerk. To solve this problem, interpolating the waypoints allows smooth estimation of the entire frenet coordinates. I have interpolated 8000 waypoints, but every 1 meter would have achieved the given goal.
+
+### Applied to simulator
+The simulator operates asynchronously with the path planning code, and as the calculated path segment transitions to the next path segment, the running speed temporarily changes due to the mismatch of the waypoints.
+To solve this problem, save the last waypoint sent from the code and the waypoints observed in the simulator. For example, the last coordinate of the first segment is used as the first point of the next segment, and the last segment is used to send the last coordinate previously saved to the simulator.
+The effect of this is to keep the previous path in the buffer and keep the point where the proper path is made.
+
+### Compute Minimum Jerk
+
+### Determine behavior
+
+
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
 
