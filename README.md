@@ -5,11 +5,11 @@ Udacity Self-driving car term3 path planning project.
 To solve the problem of running smoothly on a track provided by a simulation, the following three must be solved.
 
 - Smoothing given waypoint data
-- Minimum jerk orbit generation
+- Minimum jerk trajectory generation
 - Create a model that minimizes costs and determine behavior.
 
 ### Smoothing exist waypoint data
-The track is 6.9 km, but 181 way points are given. Linear interpolation of waypoints to calculate map coordinates in Frenet coordinates and apply them to the simulator. Simply restricting the d-coordinate of the Frenet and increasing the s-coordinate sequentially results in excessive acceleration and jerk. To solve this problem, interpolating the waypoints allows smooth estimation of the entire frenet coordinates. I have interpolated 8000 waypoints, but every 1 meter would have achieved the given goal.
+The track is 6.9 km, but 181 waypoints are given. Linear interpolation of waypoints to calculate map coordinates in Frenet coordinates and apply them to the simulator. Simply restricting the d-coordinate of the Frenet and increasing the s-coordinate sequentially results in excessive acceleration and jerk. To solve this problem, interpolating the waypoints allows smooth estimation of the entire frenet coordinates. I have interpolated 8000 waypoints, but every 1 meter would have achieved the given goal.
 
 ### Applied to simulator
 The simulator operates asynchronously with the path planning code, and as the calculated path segment transitions to the next path segment, the running speed temporarily changes due to the mismatch of the waypoints.
@@ -17,7 +17,7 @@ To solve this problem, save the last waypoint sent from the code and the waypoin
 The effect of this is to keep the previous path in the buffer and keep the point where the proper path is made.
 
 ### Compute Minimum Jerk
-To create a smooth path, you must have a certain time interval. This is a long enough time to change the lane and to make time to calculate the cost function. The following assumes that the acceleration at the beginning and end of the minimum jerk frame is zero. This is helpful when switching from t-th frame to t + 1 frame. Acceleration and jerk are all associated with the constraint that velocity must match both at the beginning and end of the frame.
+To create a smooth path, you must have a certain time interval. This is a long enough time to change the lane and to make time to calculate the cost function. The following assumes that the acceleration at the beginning and end of the minimum jerk frame is zero. This is helpful when switching from t frame to t + 1 frame. Acceleration and jerk are all associated with the constraint that velocity must match both at the beginning and end of the frame.
 Use the standard jerk model to minimize the 5th order polynomial model as described in the lecture.
 
 ### Determine behavior
@@ -27,10 +27,10 @@ Given that the speed is relatively low and the gaps are relatively large, there 
 - Left lane change.
 - Right lane change.
 
-In the case of a lane change, the lane must not make the most leftward or rightmost change action and should be acceptable in relation to the other vehicle. If both use the least cost and the lane change is not appropriate, the cost will be set high. The location of the nearest car in front of and behind the car is used to calculate the cost.
+In the case of a lane change, the lane must not make the most left or right change action and should be acceptable in relation to the other vehicle. If both use the least cost and the lane change is not appropriate, the cost will be set high. The location of the nearest car in front of and behind the car is used to calculate the cost.
 
-If you go straight ahead, you only need to consider the same lane. This is because other cars are quite good at beating you in the back.
-If going straight, one more thing should be considered. You should not hit a car that is ahead of us to maximize speed with speed limitations. You may not be able to change lanes, but the car will slow down and you will need to monitor your car ahead of time and adjust the speed. The way I choose to achieve this is to modify the planned path final speed in proportion to the distance measurement from the nearest car ahead of me.
+If go straight ahead, only need to consider the same lane. This is because other cars are quite good at beating in the back.
+If going straight, one more thing should be considered. should not hit a car that is ahead of us to maximize speed with speed limitations. may not be able to change lanes, but the car will slow down and you will need to monitor car ahead of time and adjust the speed. The way I choose to achieve this is to modify the planned path final speed in proportion to the distance measurement from the nearest car ahead of me.
 
 Once each cost is calculated and the lowest cost is determined, the action you can take is sent to the least jerk trajectory code.
 
