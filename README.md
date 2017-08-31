@@ -17,10 +17,28 @@ To solve this problem, save the last waypoint sent from the code and the waypoin
 The effect of this is to keep the previous path in the buffer and keep the point where the proper path is made.
 
 ### Compute Minimum Jerk
+To create a smooth path, you must have a certain time interval. This is a long enough time to change the lane and to make time to calculate the cost function. The following assumes that the acceleration at the beginning and end of the minimum jerk frame is zero. This is helpful when switching from t-th frame to t + 1 frame. Acceleration and jerk are all associated with the constraint that velocity must match both at the beginning and end of the frame.
+Use the standard jerk model to minimize the 5th order polynomial model as described in the lecture.
 
 ### Determine behavior
+Given that the speed is relatively low and the gaps are relatively large, there is no need to use too many states to complicate the problem. I implemented the following behavior.
+
+- keep going.
+- Left lane change.
+- Right lane change.
+
+In the case of a lane change, the lane must not make the most leftward or rightmost change action and should be acceptable in relation to the other vehicle. If both use the least cost and the lane change is not appropriate, the cost will be set high. The location of the nearest car in front of and behind the car is used to calculate the cost.
+
+If you go straight ahead, you only need to consider the same lane. This is because other cars are quite good at beating you in the back.
+If going straight, one more thing should be considered. You should not hit a car that is ahead of us to maximize speed with speed limitations. You may not be able to change lanes, but the car will slow down and you will need to monitor your car ahead of time and adjust the speed. The way I choose to achieve this is to modify the planned path final speed in proportion to the distance measurement from the nearest car ahead of me.
+
+Once each cost is calculated and the lowest cost is determined, the action you can take is sent to the least jerk trajectory code.
 
 
+### Conclusion
+The resulting path planner works fine, but it is not perfect. If all other lanes are running at the same speed in all possible lanes, there is a chance that the planner will fall into a deadlock that can not be determined. However, this is a very rare phenomenon that can not occur in real world.
+
+---
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
 
@@ -79,10 +97,6 @@ the path has processed since last time.
 1. The car uses a perfect controller and will visit every (x,y) point it recieves in the list every .02 seconds. The units for the (x,y) points are in meters and the spacing of the points determines the speed of the car. The vector going from a point to the next point in the list dictates the angle of the car. Acceleration both in the tangential and normal directions is measured along with the jerk, the rate of change of total Acceleration. The (x,y) point paths that the planner recieves should not have a total acceleration that goes over 10 m/s^2, also the jerk should not go over 50 m/s^3. (NOTE: As this is BETA, these requirements might change. Also currently jerk is over a .02 second interval, it would probably be better to average total acceleration over 1 second and measure jerk from that.
 
 2. There will be some latency between the simulator running and the path planner returning a path, with optimized code usually its not very long maybe just 1-3 time steps. During this delay the simulator will continue using points that it was last given, because of this its a good idea to store the last points you have used so you can have a smooth transition. previous_path_x, and previous_path_y can be helpful for this transition since they show the last points given to the simulator controller with the processed points already removed. You would either return a path that extends this previous path or make sure to create a new path that has a smooth transition with this last path.
-
-## Tips
-
-A really helpful resource for doing this project and creating smooth trajectories was using http://kluge.in-chemnitz.de/opensource/spline/, the spline function is in a single hearder file is really easy to use.
 
 ---
 
